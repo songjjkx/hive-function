@@ -10,11 +10,11 @@ import org.apache.hadoop.hive.ql.exec.UDF;
  */
 @Description(
         name = "get_max_num",
-        value = "_FUNC_(x, y) - return the maximum value in x,y",
+        value = "_FUNC_(x, y, ...) - return the maximum value in x,y,...",
         extended = "Example:\n"
                 + "  > SELECT _FUNC_(1, 5) FROM table;\n"
                 + "  5\n"
-                + "  > SELECT _FUNC_(-123, 789) FROM table;\n"
+                + "  > SELECT _FUNC_(-123, 789, 0) FROM table;\n"
                 + "  789"
 )
 public class GetMaxNumUDF extends UDF {
@@ -35,7 +35,7 @@ public class GetMaxNumUDF extends UDF {
     }
 
     /**
-     * 返回两个数字中的最大值，都为空则返回null
+     * 返回数字集合中的最大值，都为空则返回null
      * 方法名称必须为evaluate
      *
      * @param nums  入参数字集合
