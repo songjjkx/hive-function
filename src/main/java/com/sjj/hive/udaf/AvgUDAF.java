@@ -21,9 +21,9 @@ public class AvgUDAF extends UDAF {
     /**
      * 创建一个类，用于存储计算所需的数据
      */
-    public static class AvgState {
-        double sum = 0.0;
-        int cnt = 0;
+    private static class AvgState {
+        private double sum = 0.0;
+        private long cnt = 0L;
     }
 
     /**
@@ -44,15 +44,15 @@ public class AvgUDAF extends UDAF {
          */
         @Override
         public void init() {
-            avgState.cnt = 0;
-            avgState.sum = 0;
+            avgState.cnt = 0L;
+            avgState.sum = 0.0;
         }
 
         /**
          * 遍历输入Hive的数据并进行处理，若入参合规且计算正确，则应返回true，否则抛出异常
          * 在该函数中，为计算入参总和并计数
          *
-         * @param num  输入Hive的数据，需要跟函数入参一致
+         * @param num 输入Hive的数据，需要跟函数入参一致
          * @return
          * @throws Exception
          */
@@ -62,7 +62,7 @@ public class AvgUDAF extends UDAF {
             }
 
             if (null != num) {
-                avgState.cnt += 1;
+                avgState.cnt += 1L;
                 avgState.sum += num;
             }
             return true;
@@ -75,7 +75,7 @@ public class AvgUDAF extends UDAF {
          */
         public AvgState terminatePartial() {
             // 按照SQL标准，当入参数量为0时，返回值为null
-            return avgState.cnt == 0 ? null : avgState;
+            return avgState.cnt == 0L ? null : avgState;
         }
 
         /**
@@ -99,7 +99,7 @@ public class AvgUDAF extends UDAF {
          * @return
          */
         public Double terminate() {
-            return avgState.cnt == 0 ? null : avgState.sum / avgState.cnt;
+            return avgState.cnt == 0L ? null : avgState.sum / avgState.cnt;
         }
     }
 
