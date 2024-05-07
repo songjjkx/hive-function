@@ -26,12 +26,29 @@ public class GetMaxNumUDF extends UDF {
      * @param n2  第二个数字
      * @return  两个数字中的最大值
      */
-    public Long evaluate(Long n1, Long n2) {
-        if (null == n2
-                || (null != n1 && n1 > n2)) {
-            return n1;
+    public String evaluate(Long n1, Long n2) {
+        Long maxNum = n1;
+        if (maxNum == null
+                || (n2 != null && n2 > maxNum)) {
+            maxNum = n2;
         }
-        return n2;
+        return "The max num (Long,Long) is " + (maxNum == null ? null : String.valueOf(maxNum));
+    }
+
+    /**
+     * 返回两个数字中的最大值，都为空则返回null
+     *
+     * @param n1  第一个数字
+     * @param n2  第二个数字
+     * @return  两个数字中的最大值
+     */
+    public String evaluate(Integer n1, Integer n2) {
+        Integer maxNum = n1;
+        if (maxNum == null
+                || (n2 != null && n2 > maxNum)) {
+            maxNum = n2;
+        }
+        return "The max num (Integer,Integer) is " + (maxNum == null ? null : String.valueOf(maxNum));
     }
 
     /**
@@ -41,7 +58,26 @@ public class GetMaxNumUDF extends UDF {
      * @param nums  入参数字集合
      * @return  入参数字集合中的最大值
      */
-    public Long evaluate(Long[] nums) {
+    public String evaluate(Integer... nums) {
+        Integer maxNum = null;
+        for (Integer num : nums) {
+            if (null == maxNum
+                    || (null != num && num > maxNum)) {
+                maxNum = num;
+            }
+        }
+
+        return "The max num (Integer...) is " + (maxNum == null ? null : String.valueOf(maxNum));
+    }
+
+    /**
+     * 返回数字集合中的最大值，都为空则返回null
+     * 方法名称必须为evaluate
+     *
+     * @param nums  入参数字集合
+     * @return  入参数字集合中的最大值
+     */
+    public String evaluate(Long[] nums) {
         Long maxNum = null;
         for (Long num : nums) {
             if (null == maxNum
@@ -49,6 +85,7 @@ public class GetMaxNumUDF extends UDF {
                 maxNum = num;
             }
         }
-        return maxNum;
+
+        return "The max num (Long[]) is " + (maxNum == null ? null : String.valueOf(maxNum));
     }
 }

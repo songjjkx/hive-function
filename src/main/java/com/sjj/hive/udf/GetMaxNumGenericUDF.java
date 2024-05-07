@@ -15,6 +15,8 @@ import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectIn
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 
+import java.io.IOException;
+
 /**
  * @author Jiajun Song
  * @version 1.0.0
@@ -30,19 +32,39 @@ import org.apache.hadoop.io.LongWritable;
                 + "  789"
 )
 public class GetMaxNumGenericUDF extends GenericUDF {
+    /**
+     * 输入参数类型
+     */
     private transient PrimitiveObjectInspector.PrimitiveCategory[] inputTypes;
+    /**
+     * 输入参数对象检查器
+     */
     private transient PrimitiveObjectInspector[] argumentOIs;
+    /**
+     * 输入参数对象转换器
+     */
     private transient ObjectInspectorConverters.Converter[] inputConverters;
 
+    /**
+     * 初始化函数，对参数类型及数量等进行检查
+     * 若函数需要连接数据库或发送HTTP请求等，可在此处执行创建数据库连接或建立连接池等操作
+     *
+     * @param arguments
+     *          The ObjectInspector for the arguments
+     * @return
+     * @throws UDFArgumentException
+     */
     @Override
     public ObjectInspector initialize(ObjectInspector[] arguments) throws UDFArgumentException {
         if (arguments.length < 2) {
             throw new UDFArgumentLengthException(
                     "get_max_num_gen requires at least 2 arguments, got " + arguments.length);
         }
-
+        // 输入参数的相关信息
         argumentOIs = new PrimitiveObjectInspector[arguments.length];
+        // 输入参数类型
         inputTypes = new PrimitiveObjectInspector.PrimitiveCategory[arguments.length];
+        // 输入参数对应的类型转换器
         inputConverters = new ObjectInspectorConverters.Converter[arguments.length];
         for (int i = 0; i < arguments.length; i++) {
             if (arguments[i].getCategory() != ObjectInspector.Category.PRIMITIVE) {
@@ -80,6 +102,16 @@ public class GetMaxNumGenericUDF extends GenericUDF {
         return PrimitiveObjectInspectorFactory.writableDoubleObjectInspector;
     }
 
+    /**
+     * 执行计算流程
+     *
+     * @param arguments
+     *          The arguments as DeferedObject, use DeferedObject.get() to get the
+     *          actual argument Object. The Objects can be inspected by the
+     *          ObjectInspectors passed in the initialize call.
+     * @return
+     * @throws HiveException
+     */
     @Override
     public Object evaluate(DeferredObject[] arguments) throws HiveException {
         Double result = null;
@@ -112,9 +144,12 @@ public class GetMaxNumGenericUDF extends GenericUDF {
                     }
                     break;
                 case DECIMAL:
-                    HiveDecimalObjectInspector decimalOI =
-                            (HiveDecimalObjectInspector) argumentOIs[i];
-                    HiveDecimalWritable val = decimalOI.getPrimitiveWritableObject(valObject);
+//                    HiveDecimalObjectInspector decimalOI =
+//                            (HiveDecimalObjectInspector) argumentOIs[i];
+//                    HiveDecimalWritable val = decimalOI.getPrimitiveWritableObject(valObject);
+
+                    valObject = inputConverters[i].convert(valObject);
+                    HiveDecimalWritable val = (HiveDecimalWritable) valObject;
 
                     if (result == null || val.doubleValue() > result) {
                         result = val.doubleValue();
@@ -128,8 +163,23 @@ public class GetMaxNumGenericUDF extends GenericUDF {
         return result == null ? null : new DoubleWritable(result);
     }
 
+    /**
+     * 函数执行结束时调用该方法
+     * 可在此处执行关闭数据库连接等操作
+     *
+     * @throws IOException
+     */
+    @Override
+    public void close() throws IOException {
+        super.close();
+    }
+
+    /**
+     * @param children  入参字段名称
+     * @return  使用explain查看执行计划时，该函数的输出内容
+     */
     @Override
     public String getDisplayString(String[] children) {
-        return "get_max_num_gen getDisplayString test";
+        return getStandardDisplayString("test-get_max_num_gen", children);
     }
 }
